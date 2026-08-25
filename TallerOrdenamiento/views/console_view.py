@@ -3,7 +3,7 @@ def display_algorithm_table(algorithm_name: str, results: list[dict]):
     print(f"\n{'=' * 65}")
     print(f" TABLA: {algorithm_name.upper()}")
     print(f"{'=' * 65}")
-    print(f"{'Algoritmo':<16} | {'Cantidad de Datos':<18} | {'Tiempo (s)':<12} | {'Caso':<10}")
+    print(f"{'Algoritmo':<16} | {'Cantidad de Datos':<18} | {'Tiempo (ms)':<12} | {'Caso':<10}")
     print(f"{'-' * 65}")
     for r in results:
         t = f"{r['time']:.6f}" if isinstance(r['time'], float) else str(r['time'])
