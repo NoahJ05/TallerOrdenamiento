@@ -45,7 +45,8 @@ class BenchmarkController:
                         algo_func(data)
                         end = time.perf_counter()
 
-                        elapsed = end - start
+                        elapsed = (end - start) * 1000  # <--- Multiplicar por 1000 para obtener milisegundos
+
                         results.append({
                             "algorithm": algo_name,
                             "size": size,
