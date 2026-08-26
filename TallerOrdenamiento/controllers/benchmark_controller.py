@@ -1,10 +1,17 @@
+"""
+Módulo Controlador para la orquestación del Benchmark.
+"""
 import time
 from models.data_loader import load_dataset
 from models.sorting_algorithms import bubble_sort, shell_sort, quick_sort, radix_sort, binary_tree_sort
 from views.console_view import display_algorithm_table
 
-
 class BenchmarkController:
+    """
+    Clase encargada de coordinar la lectura de datos, ejecución de los algoritmos 
+    y recolección de los tiempos de cómputo en milisegundos.
+    """
+    
     def __init__(self):
         self.sizes = [3000, 30000, 300000, 3000000, 30000000]
         self.cases = ["Mejor", "Peor", "Promedio"]
@@ -17,6 +24,13 @@ class BenchmarkController:
         }
 
     def execute_benchmarks(self):
+        """
+        Ejecuta el ciclo de pruebas para todos los algoritmos, tamaños y casos.
+        
+        Implementa restricciones de seguridad para evitar desbordamientos de memoria 
+        o tiempos de ejecución excesivos (congelamientos) en algoritmos de 
+        complejidad cuadrática y volúmenes de datos masivos.
+        """
         print("Iniciando pruebas de rendimiento con archivos compartidos...\n")
 
         for algo_name, algo_func in self.algorithms.items():
@@ -24,8 +38,19 @@ class BenchmarkController:
             print(f"> Evaluando {algo_name}...")
 
             for size in self.sizes:
-                # Omitir O(n^2) en N grandes para evitar congelamientos de horas
+                # Omitir O(N^2) en N grandes para evitar congelamientos
                 if algo_name in ["BubbleSort", "BinaryTreeSort"] and size >= 300000:
+                    for case in self.cases:
+                        results.append({
+                            "algorithm": algo_name,
+                            "size": size,
+                            "time": "Omitido (> límite)",
+                            "case": case
+                        })
+                    continue
+                    
+                # Opcional: Limitar ShellSort en la prueba más extrema
+                if algo_name == "ShellSort" and size >= 30000000:
                     for case in self.cases:
                         results.append({
                             "algorithm": algo_name,
@@ -37,25 +62,23 @@ class BenchmarkController:
 
                 for case in self.cases:
                     try:
-                        # 1. Carga previa (no se mide este tiempo)
+                        print(f"   -> Procesando {algo_name} | N = {size} | Caso: {case}...")
                         data = load_dataset(size, case)
-
-                        # 2. Medición estricta del algoritmo
+                        
                         start = time.perf_counter()
                         algo_func(data)
                         end = time.perf_counter()
 
-                        elapsed = (end - start) * 1000  # <--- Multiplicar por 1000 para obtener milisegundos
-
+                        elapsed_ms = (end - start) * 1000
+                        
                         results.append({
                             "algorithm": algo_name,
                             "size": size,
-                            "time": elapsed,
+                            "time": elapsed_ms,
                             "case": case
                         })
                     except FileNotFoundError as err:
                         print(f"Error: {err}")
                         break
 
-            # Mostrar la tabla individual correspondiente a este algoritmo
             display_algorithm_table(algo_name, results)
