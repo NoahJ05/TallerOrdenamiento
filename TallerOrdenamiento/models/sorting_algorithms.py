@@ -1,40 +1,88 @@
-import sys
+"""
+Módulo de Algoritmos de Ordenamiento.
 
+Contiene las implementaciones de 5 algoritmos clásicos ajustados para ordenar 
+listas de enteros en orden DESCENDENTE.
+
+Autor: Johan Mauricio Orozco Garcia
+"""
+
+import sys
 sys.setrecursionlimit(2000000)
 
-
-# --- 1. BUBBLE SORT ---
 def bubble_sort(arr: list[int]) -> list[int]:
+    """
+    Ordena una lista utilizando el algoritmo de Burbuja (Bubble Sort).
+    
+    Implementa una bandera 'swapped' para optimizar el Mejor Caso.
+    
+    Args:
+        arr (list[int]): Lista de enteros a ordenar.
+        
+    Returns:
+        list[int]: Lista ordenada en formato descendente.
+        
+    Complejidad:
+        - Mejor caso: O(N) (Arreglo ya ordenado)
+        - Promedio / Peor caso: O(N^2)
+    """
     n = len(arr)
     for i in range(n):
         swapped = False
         for j in range(0, n - i - 1):
-            if arr[j] < arr[j + 1]:  # Descendente
+            if arr[j] < arr[j + 1]:
                 arr[j], arr[j + 1] = arr[j + 1], arr[j]
                 swapped = True
         if not swapped:
             break
     return arr
 
-
-# --- 2. SHELL SORT ---
 def shell_sort(arr: list[int]) -> list[int]:
+    """
+    Ordena una lista utilizando el algoritmo Shell Sort.
+    
+    Utiliza la secuencia de brechas original de Shell (N/2).
+    
+    Args:
+        arr (list[int]): Lista de enteros a ordenar.
+        
+    Returns:
+        list[int]: Lista ordenada en formato descendente.
+        
+    Complejidad:
+        - Promedio: Depende de la brecha, aprox. O(N^1.3) a O(N log^2 N)
+        - Peor caso: O(N^2)
+    """
     n = len(arr)
     gap = n // 2
     while gap > 0:
         for i in range(gap, n):
             temp = arr[i]
             j = i
-            while j >= gap and arr[j - gap] < temp:  # Descendente
+            while j >= gap and arr[j - gap] < temp:
                 arr[j] = arr[j - gap]
                 j -= gap
             arr[j] = temp
         gap //= 2
     return arr
 
-
-# --- 3. QUICKSORT (In-place descendente con pivote central) ---
 def quick_sort(arr: list[int]) -> list[int]:
+    """
+    Ordena una lista utilizando Quick Sort in-place.
+    
+    Utiliza el elemento central como pivote para evitar la degradación 
+    a complejidad cuadrática en listas previamente ordenadas.
+    
+    Args:
+        arr (list[int]): Lista de enteros a ordenar.
+        
+    Returns:
+        list[int]: Lista ordenada en formato descendente.
+        
+    Complejidad:
+        - Mejor / Promedio: O(N log N)
+        - Peor caso: O(N log N) (Protegido por el pivote central)
+    """
     def _quicksort(items, low, high):
         if low < high:
             p = _partition(items, low, high)
@@ -47,7 +95,7 @@ def quick_sort(arr: list[int]) -> list[int]:
         pivot = items[high]
         i = low - 1
         for j in range(low, high):
-            if items[j] >= pivot:  # Mayor o igual a la izquierda (Descendente)
+            if items[j] >= pivot:
                 i += 1
                 items[i], items[j] = items[j], items[i]
         items[i + 1], items[high] = items[high], items[i + 1]
@@ -56,31 +104,38 @@ def quick_sort(arr: list[int]) -> list[int]:
     _quicksort(arr, 0, len(arr) - 1)
     return arr
 
-
-# --- 4. RADIX SORT ---
-def _counting_sort_desc(arr: list[int], exp: int):
-    n = len(arr)
-    output = [0] * n
-    count = [0] * 10
-
-    for i in range(n):
-        index = (arr[i] // exp) % 10
-        count[index] += 1
-
-    # Acumulación inversa para orden descendente
-    for i in range(8, -1, -1):
-        count[i] += count[i + 1]
-
-    for i in range(n - 1, -1, -1):
-        index = (arr[i] // exp) % 10
-        output[count[index] - 1] = arr[i]
-        count[index] -= 1
-
-    for i in range(n):
-        arr[i] = output[i]
-
-
 def radix_sort(arr: list[int]) -> list[int]:
+    """
+    Ordena una lista utilizando Radix Sort basado en Counting Sort.
+    
+    El proceso de conteo y acumulación está invertido para lograr
+    el orden descendente.
+    
+    Args:
+        arr (list[int]): Lista de enteros positivos.
+        
+    Returns:
+        list[int]: Lista ordenada en formato descendente.
+        
+    Complejidad:
+        - Todos los casos: O(N * d) donde d es la cantidad de dígitos.
+    """
+    def _counting_sort_desc(arr_in, exp):
+        n = len(arr_in)
+        output = [0] * n
+        count = [0] * 10
+        for i in range(n):
+            index = (arr_in[i] // exp) % 10
+            count[index] += 1
+        for i in range(8, -1, -1):
+            count[i] += count[i + 1]
+        for i in range(n - 1, -1, -1):
+            index = (arr_in[i] // exp) % 10
+            output[count[index] - 1] = arr_in[i]
+            count[index] -= 1
+        for i in range(n):
+            arr_in[i] = output[i]
+
     if not arr:
         return arr
     max_val = max(arr)
@@ -90,19 +145,34 @@ def radix_sort(arr: list[int]) -> list[int]:
         exp *= 10
     return arr
 
-
-# --- 5. BINARY TREE SORT (Iterativo para prevenir desbordes) ---
 class TreeNode:
+    """Nodo fundamental para la estructura del Árbol Binario de Búsqueda."""
     def __init__(self, key: int):
         self.key = key
         self.left = None
         self.right = None
 
-
 def binary_tree_sort(arr: list[int]) -> list[int]:
+    """
+    Ordena una lista insertando sus elementos en un Árbol Binario de Búsqueda.
+    
+    Se implementa de forma iterativa tanto la inserción como el recorrido
+    (Derecha-Raíz-Izquierda) para evitar desbordamientos de pila (RecursionError)
+    ante árboles degenerados.
+    
+    Args:
+        arr (list[int]): Lista de enteros a ordenar.
+        
+    Returns:
+        list[int]: Lista extraída del árbol en orden descendente.
+        
+    Complejidad:
+        - Mejor / Promedio: O(N log N)
+        - Peor caso: O(N^2) (Árbol degenerado como lista enlazada)
+    """
     if not arr:
         return []
-
+    
     root = TreeNode(arr[0])
     for val in arr[1:]:
         curr = root
@@ -118,7 +188,6 @@ def binary_tree_sort(arr: list[int]) -> list[int]:
                     break
                 curr = curr.right
 
-    # Recorrido inverso (Derecha -> Raíz -> Izquierda) para orden descendente
     result = []
     stack = []
     curr = root
@@ -130,4 +199,5 @@ def binary_tree_sort(arr: list[int]) -> list[int]:
         result.append(curr.key)
         curr = curr.left
 
+    return result
     return result
