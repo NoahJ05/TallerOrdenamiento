@@ -65,18 +65,19 @@ class BenchmarkController:
                         print(f"   -> Procesando {algo_name} | N = {size} | Caso: {case}...")
                         data = load_dataset(size, case)
                         
-                        start = time.perf_counter()
+                        start = time.perf_counter_ns()
                         algo_func(data)
-                        end = time.perf_counter()
+                        end = time.perf_counter_ns()
 
-                        elapsed_ms = (end - start) * 1000
-                        
+                        elapsed_ns = end - start
+
                         results.append({
                             "algorithm": algo_name,
                             "size": size,
-                            "time": elapsed_ms,
+                            "time": elapsed_ns,
                             "case": case
                         })
+
                     except FileNotFoundError as err:
                         print(f"Error: {err}")
                         break
